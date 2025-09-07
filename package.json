@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "prepare": "husky",
-    "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
+    "lint": "npm -w server run lint && npm -w client run lint",
     "format": "prettier -c .",
     "typecheck": "npm -w server run typecheck && npm -w client run typecheck",
     "test": "npm -w server run test",
@@ -20,20 +20,24 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.35.0",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
     "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.2",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "typescript-eslint": "^8.42.0"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,md,css}": [
+    "*.{js,ts,tsx,jsx,json,md,css}": [
       "prettier --write"
     ],
-    "*.{ts,tsx,js,jsx}": [
+    "*.{js,ts,tsx,jsx}": [
       "eslint --fix"
     ]
   },
