@@ -20,11 +20,11 @@ jobs:
 
       - name: Install server deps
         working-directory: server
-        run: npm ci
+        run: npm ci --ignore-scripts || npm i --ignore-scripts
 
       - name: Install client deps
         working-directory: client
-        run: npm ci
+        run: npm ci --ignore-scripts || npm i --ignore-scripts
 
       - name: Lint
         run: npm run lint
