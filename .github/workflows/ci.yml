@@ -7,8 +7,9 @@ on:
     branches: [ main ]
 
 jobs:
-  quick-checks:
+  build-test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -18,16 +19,22 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install server deps
-        working-directory: server
-        run: npm ci --ignore-scripts || npm i --ignore-scripts
-
-      - name: Install client deps
-        working-directory: client
-        run: npm ci --ignore-scripts || npm i --ignore-scripts
+      # 🔧 Install ALL deps (root + workspaces) once
+      - name: Install dependencies (root + workspaces)
+        run: npm ci --ignore-scripts --workspaces --include-workspace-root
 
       - name: Lint
         run: npm run lint
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Test (server)
+        working-directory: server
+        env:
+          JWT_SECRET: test_secret
+        run: npm run test --silent
+
+      - name: Build client
+        working-directory: client
+        run: npm run build
