@@ -7,7 +7,7 @@
     "client"
   ],
   "scripts": {
-    "prepare": "husky",
+    "prepare": "husky || true ",
     "lint": "npm -w server run lint && npm -w client run lint",
     "format": "prettier -c .",
     "typecheck": "npm -w server run typecheck && npm -w client run typecheck",
