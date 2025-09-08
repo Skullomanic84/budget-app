@@ -1,9 +1,21 @@
 import express from 'express'
-import type { Prisma } from '@prisma/client'
 import cors from 'cors'
 import helmet from 'helmet'
-import { z } from 'zod'
-import { prisma } from './db.js' // ✅ ESM import
+import { orgContext } from './middleware/org.js'
+import { errorHandler } from './middleware/error.js'
+import {
+  createTransaction,
+  listTransactions,
+  updateTransaction,
+  deleteTransaction,
+} from './routes/transactions.js'
+import {
+  listCategories,
+  createCategory,
+  deleteCategory,
+} from './routes/categories.js'
+import { getMonthlySummary } from './routes/summary.js'
+import { prisma } from './db.js'
 
 const app = express()
 app.use(express.json())
@@ -15,71 +27,25 @@ app.get('/health/db', async (_req, res) => {
   res.json({ ok: true, orgs })
 })
 
-const txnSchema = z.object({
-  type: z.enum(['INCOME', 'EXPENSE']),
-  amount: z.coerce.number().positive(),
-  currency: z.string().default('ZAR'),
-  date: z.coerce.date(),
-  categoryId: z.string().uuid().optional(),
-  notes: z.string().max(500).optional(),
-})
+// All org routes share org context
+app.use('/org/:orgId', orgContext)
 
-app.post('/org/:orgId/transactions', async (req, res) => {
-  const { orgId } = req.params
-  const userId =
-    req.header('x-mock-user') ?? '00000000-0000-0000-0000-000000000001'
+// categories
+app.get('/org/:orgId/categories', listCategories)
+app.post('/org/:orgId/categories', createCategory)
+app.delete('/org/:orgId/categories/:id', deleteCategory)
 
-  const parsed = txnSchema.safeParse(req.body)
-  if (!parsed.success) return res.status(400).json(parsed.error.flatten())
+// transactions
+app.get('/org/:orgId/transactions', listTransactions)
+app.post('/org/:orgId/transactions', createTransaction)
+app.patch('/org/:orgId/transactions/:id', updateTransaction)
+app.delete('/org/:orgId/transactions/:id', deleteTransaction)
 
-  const d = parsed.data
-  const txn = await prisma.transaction.create({
-    data: {
-      orgId,
-      userId,
-      type: d.type,
-      amount: d.amount,
-      currency: d.currency,
-      date: d.date,
-      categoryId: d.categoryId ?? null, // ✅
-      notes: d.notes ?? null, // ✅
-    },
-  })
-  res.status(201).json(txn)
-})
+// monthly summary
+app.get('/org/:orgId/summary', getMonthlySummary)
 
-app.get('/org/:orgId/transactions', async (req, res) => {
-  const orgId = req.orgId as string
-  const { from, to, type, categoryId } = req.query as Record<
-    string,
-    string | undefined
-  >
-
-  // Narrow type to the exact union Prisma expects
-  const qType: 'INCOME' | 'EXPENSE' | undefined =
-    type === 'INCOME' || type === 'EXPENSE'
-      ? (type as 'INCOME' | 'EXPENSE')
-      : undefined
-
-  const dateFilter: Record<string, Date> = {}
-  if (from) dateFilter.gte = new Date(from)
-  if (to) dateFilter.lte = new Date(to)
-
-  const where: Prisma.TransactionWhereInput = {
-    orgId,
-    ...(qType ? { type: qType } : {}),
-    ...(categoryId ? { categoryId } : {}),
-    ...(from || to ? { date: dateFilter } : {}),
-  }
-
-  const transactions = await prisma.transaction.findMany({
-    where,
-    orderBy: { date: 'desc' },
-    take: 100,
-  })
-
-  res.json(transactions)
-})
+// error handler last
+app.use(errorHandler)
 
 app.listen(process.env.PORT ?? 4000, () =>
   console.log('API up on', process.env.PORT ?? 4000)

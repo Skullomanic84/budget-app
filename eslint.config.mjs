@@ -39,7 +39,10 @@ export default [
       globals: { ...globals.node },
     },
     rules: {
-      // '@typescript-eslint/no-explicit-any': 'off', // optional
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_' },
+      ],
     },
   },
 
