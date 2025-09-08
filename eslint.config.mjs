@@ -1,9 +1,4 @@
 // ESLint v9 Flat Config for monorepo (server + client)
-// - TypeScript + React (client)
-// - Node (server)
-// - Vitest test files
-// - Prettier compatibility
-
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import react from 'eslint-plugin-react'
@@ -30,23 +25,44 @@ export default [
   // 2) TypeScript recommended rules
   ...tseslint.configs.recommended,
 
-  // 3) Server (Node) files
+  // 3) Server (Node) files (TS only)
   {
-    files: ['server/**/*.{ts,js}'],
+    files: ['server/**/*.ts'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        project: './server/tsconfig.json', // ✅ point to server's TS config
-        tsconfigRootDir: import.meta.dirname, // ✅ force correct root
+        project: './server/tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+      globals: { ...globals.node },
+    },
+    rules: {
+      // '@typescript-eslint/no-explicit-any': 'off', // optional
+    },
+  },
+
+  // 3b) Server tests (type-aware + vitest globals)
+  {
+    files: ['server/tests/**/*.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: './server/tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         ...globals.node,
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
       },
-    },
-    rules: {
-      // Node-specific rule tweaks go here if you want
     },
   },
 
@@ -59,29 +75,21 @@ export default [
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: { jsx: true },
-        project: './client/tsconfig.json', // ✅ point to client's TS config
+        project: './client/tsconfig.json',
         tsconfigRootDir: import.meta.dirname,
       },
-      globals: {
-        ...globals.browser,
-      },
+      globals: { ...globals.browser },
     },
-    plugins: {
-      react,
-      'react-hooks': reactHooks,
-    },
-    settings: {
-      react: { version: 'detect' },
-    },
+    plugins: { react, 'react-hooks': reactHooks },
+    settings: { react: { version: 'detect' } },
     rules: {
-      // React 17+ / Vite don’t require React in scope
       'react/react-in-jsx-scope': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
     },
   },
 
-  // 5) Test files (Vitest)
+  // 5) Generic tests (if any outside server/tests)
   {
     files: ['**/*.test.{ts,tsx,js,jsx}', '**/tests/**/*.{ts,tsx,js,jsx}'],
     languageOptions: {
@@ -91,7 +99,6 @@ export default [
         sourceType: 'module',
       },
       globals: {
-        // Vitest globals
         describe: 'readonly',
         it: 'readonly',
         test: 'readonly',
@@ -102,12 +109,9 @@ export default [
         afterEach: 'readonly',
       },
     },
-    rules: {
-      // Tests often allow dev deps and console logs – tweak if needed
-      'no-console': 'off',
-    },
+    rules: { 'no-console': 'off' },
   },
 
-  // 6) Prettier: turn off formatting-related ESLint rules
+  // 6) Prettier
   prettier,
 ]

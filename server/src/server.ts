@@ -1,4 +1,5 @@
 import express from 'express'
+import type { Prisma } from '@prisma/client'
 import cors from 'cors'
 import helmet from 'helmet'
 import { z } from 'zod'
@@ -48,16 +49,26 @@ app.post('/org/:orgId/transactions', async (req, res) => {
 })
 
 app.get('/org/:orgId/transactions', async (req, res) => {
-  const { orgId } = req.params
-  const { from, to, type } = req.query
+  const orgId = req.orgId as string
+  const { from, to, type, categoryId } = req.query as Record<
+    string,
+    string | undefined
+  >
+
+  // Narrow type to the exact union Prisma expects
+  const qType: 'INCOME' | 'EXPENSE' | undefined =
+    type === 'INCOME' || type === 'EXPENSE'
+      ? (type as 'INCOME' | 'EXPENSE')
+      : undefined
 
   const dateFilter: Record<string, Date> = {}
-  if (from) dateFilter.gte = new Date(String(from))
-  if (to) dateFilter.lte = new Date(String(to))
+  if (from) dateFilter.gte = new Date(from)
+  if (to) dateFilter.lte = new Date(to)
 
-  const where = {
+  const where: Prisma.TransactionWhereInput = {
     orgId,
-    ...(type ? { type: type as any } : {}),
+    ...(qType ? { type: qType } : {}),
+    ...(categoryId ? { categoryId } : {}),
     ...(from || to ? { date: dateFilter } : {}),
   }
 
@@ -66,6 +77,7 @@ app.get('/org/:orgId/transactions', async (req, res) => {
     orderBy: { date: 'desc' },
     take: 100,
   })
+
   res.json(transactions)
 })
 
