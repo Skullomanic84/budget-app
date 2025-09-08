@@ -3,6 +3,7 @@
   "compilerOptions": {
     "rootDir": "./",              // keep as "./" if you have non-src TS like prisma/seed.ts
     "outDir": "./dist",
+    
 
     "target": "ES2022",
     "lib": ["ES2022"],
