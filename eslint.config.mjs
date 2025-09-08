@@ -38,9 +38,8 @@ export default [
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        // When you want type-aware rules later, enable:
-        // projectService: true,
-        // tsconfigRootDir: new URL('./server', import.meta.url),
+        project: './server/tsconfig.json', // ✅ point to server's TS config
+        tsconfigRootDir: import.meta.dirname, // ✅ force correct root
       },
       globals: {
         ...globals.node,
@@ -60,9 +59,8 @@ export default [
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: { jsx: true },
-        // Type-aware later?:
-        // projectService: true,
-        // tsconfigRootDir: new URL('./client', import.meta.url),
+        project: './client/tsconfig.json', // ✅ point to client's TS config
+        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         ...globals.browser,
