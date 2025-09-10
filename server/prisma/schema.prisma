@@ -50,10 +50,11 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  memberships  OrgMember[]
-  transactions Transaction[]
-  receipts     Receipt[]
-  reports      Report[] // ⬅ back-relation for Report.user
+  memberships   OrgMember[]
+  transactions  Transaction[]
+  receipts      Receipt[]
+  reports       Report[] // ⬅ back-relation for Report.user
+  refreshTokens RefreshToken[]
 }
 
 model OrgMember {
@@ -139,4 +140,20 @@ model Report {
   user User @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([orgId, taxYear])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String // hash of opaque refresh token
+  userAgent String?
+  ip        String?
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
