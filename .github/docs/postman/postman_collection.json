@@ -1,0 +1,266 @@
+{
+  "info": {
+    "name": "Budget Tracker (MVP)",
+    "_postman_id": "f4e6e9a6-0a1d-49f4-a7e8-collection-id",
+    "description": "Auth + Org endpoints for Budget Tracker MVP.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health: DB",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health/db",
+          "host": ["{{base_url}}"],
+          "path": ["health", "db"]
+        }
+      }
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "}",
+                  "if (json && json.user && json.user.id) {",
+                  "  pm.collectionVariables.set('userId', json.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user_{{timestamp}}@test.local\",\n  \"password\": \"Password123!\",\n  \"name\": \"Test User\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "}",
+                  "if (json && json.user && json.user.id) {",
+                  "  pm.collectionVariables.set('userId', json.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"{{login_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/org/{{orgId}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["org", "{{orgId}}", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Fuel\"\n}" },
+            "url": {
+              "raw": "{{base_url}}/org/{{orgId}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["org", "{{orgId}}", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/org/{{orgId}}/categories/{{categoryId}}",
+              "host": ["{{base_url}}"],
+              "path": ["org", "{{orgId}}", "categories", "{{categoryId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/org/{{orgId}}/transactions?from={{from}}&to={{to}}&type={{type}}",
+              "host": ["{{base_url}}"],
+              "path": ["org", "{{orgId}}", "transactions"],
+              "query": [
+                { "key": "from", "value": "{{from}}" },
+                { "key": "to", "value": "{{to}}" },
+                { "key": "type", "value": "{{type}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"EXPENSE\",\n  \"amount\": 199.99,\n  \"currency\": \"ZAR\",\n  \"date\": \"2025-09-10\",\n  \"categoryId\": null,\n  \"notes\": \"Groceries\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/org/{{orgId}}/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["org", "{{orgId}}", "transactions"]
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Groceries @ Checkers\",\n  \"amount\": 189.99\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/org/{{orgId}}/transactions/{{txnId}}",
+              "host": ["{{base_url}}"],
+              "path": ["org", "{{orgId}}", "transactions", "{{txnId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/org/{{orgId}}/transactions/{{txnId}}",
+              "host": ["{{base_url}}"],
+              "path": ["org", "{{orgId}}", "transactions", "{{txnId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Summary (Monthly)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/org/{{orgId}}/summary?month={{month}}",
+          "host": ["{{base_url}}"],
+          "path": ["org", "{{orgId}}", "summary"],
+          "query": [{ "key": "month", "value": "{{month}}" }]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:4000" },
+    { "key": "login_email", "value": "demo@example.com" },
+    { "key": "login_password", "value": "Password123!" },
+    { "key": "accessToken", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "orgId", "value": "" },
+    { "key": "categoryId", "value": "" },
+    { "key": "txnId", "value": "" },
+    { "key": "month", "value": "2025-09" },
+    { "key": "from", "value": "2025-09-01" },
+    { "key": "to", "value": "2025-09-30" },
+    { "key": "type", "value": "" },
+    { "key": "timestamp", "value": "{{$timestamp}}" }
+  ]
+}
