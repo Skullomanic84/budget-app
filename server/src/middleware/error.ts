@@ -217,6 +217,8 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ) {
+
+   void _next
   // Structured server-side logging without leaking stacks in prod
   const log = {
     time: new Date().toISOString(),
