@@ -1,15 +1,25 @@
-import './App.css'
-import { Button } from './components/ui/button'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import LoginPage from './components/auth/LoginPage'
+
 
 function App() {
-
   return (
-    <>
-      <div className="p-4 text-shadow-lg">Hello Tailwind v4.1!</div>
-      <div className="flex min-h-svh flex-col items-center justify-center">
-        <Button>Click me</Button>
-      </div>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            <LoginPage
+              onLogin={() => {
+                /* route to dashboard later */
+              }}
+            />
+          }
+        />
+        {/* redirect root to /login for now */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
