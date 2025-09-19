@@ -104,6 +104,12 @@ model Transaction {
   category Category? @relation(fields: [categoryId], references: [id])
 
   receipts Receipt[]
+
+  @@index([orgId, date], name: "txn_org_date_idx")
+  @@index([orgId, type], name: "txn_org_type_idx")
+  
+  @@index([orgId, categoryId], name: "txn_org_category_idx")
+  @@index([orgId, userId], name: "txn_org_user_idx")
 }
 
 model Receipt {
